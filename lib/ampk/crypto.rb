@@ -1,3 +1,4 @@
+require 'openssl'
 module Crypto
 	def self.create_keys(priv = "dsa_key", pub = "#{priv}", bits = 1024)
 		private_key = OpenSSL::PKey::RSA.new(bits)
@@ -18,7 +19,7 @@ module Crypto
 		end
 		
 		def self.from_file(filename, digest_string)
-			self.new(File.read(filename, digest_string))
+			self.new(File.read(filename), digest_string)
 		end
 		
 		def encrypt(text)
