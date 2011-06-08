@@ -1,4 +1,3 @@
-
 class AmpkWriter
 	def initialize(path, private_key, &block)
 		@fp = File.open(path,'wb')
