@@ -1,4 +1,6 @@
 require 'openssl'
+require 'base64'
+
 module Crypto
 	def self.create_keys(priv = "dsa_key", pub = "#{priv}", bits = 1024)
 		private_key = OpenSSL::PKey::RSA.new(bits)

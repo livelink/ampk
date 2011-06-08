@@ -1,6 +1,6 @@
 spec = Gem::Specification.new do |s|
   s.name = "ampk"
-  s.version = "0.0.3"
+  s.version = "0.0.4"
   s.author = "Geoff Youngs"
   s.email = "g@intersect-uk.co.uk"
   s.homepage = "http://github.com/livelink/ampk"
