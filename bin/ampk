@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+
+lib = File.expand_path('../../lib/', __FILE__)
+$:.unshift lib unless $:.include?(lib)
+
+require 'ampk'
+require 'optparse'
+Version = [0,0,1]
+def Version.to_s; "v#{join('.')}"; end
+
+options = {
+  :verbose => false
+}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: ampk [options] <archive> [<files>]"
+  opts.on('-v', '--verbose', 'Verbose output') do
+    options[:verbose] = true
+  end
+  opts.on('-V', '--version', 'Display version') do
+    options[:mode] = :version
+  end
+  opts.on('-k', '--key=KEYFILE', 'Keyfile') do |key|
+    options[:keyfile] = key
+  end
+  opts.on('-d', '--digest=DIGEST', 'Digest/Password for keyfile') do |digest|
+	options[:digest] = digest
+  end
+  opts.on('-t', '--test', 'Check archive') do |v|
+    options[:mode] = :test
+  end
+  opts.on('-x', '--extract', 'Extract archive contents') do
+    options[:mode] = :extract
+  end
+  opts.on('-c', '--create', 'Create an archive') do
+    options[:mode] = :create
+  end
+  opts.on('-l', '--list', 'List archive contents') do
+    options[:mode] = :list
+  end
+end
+parser.program_name = File.basename(__FILE__)
+parser.parse!
+
+case options[:mode]
+when :create
+  key = Crypto::Key.from_file(options[:keyfile], options[:digest]) if options[:keyfile]
+  archive = AmpkReader.new(ARGV[0], key)
+  if archive.signed_or_encrypted?
+	if key.nil? && !options[:nocrypt]
+		raise "Archive requires a valid keyfile to verify"
+	end
+  end
+
+  archive.verify!
+when :extract
+when :list
+  key = Crypto::Key.from_file(options[:keyfile], options[:digest]) if options[:keyfile]
+  archive = AmpkReader.new(ARGV[0], key)
+
+  bits = [['Type', 'Flags', 'Size', 'Filename']]
+
+  archive.entities.each do |name|
+	info = archive.entity(name)
+	flags = info[:filter].to_s
+	flags += "S" if info[:signature]
+	bits << [info[:type], flags, info[:length], name]
+  end
+
+  if options[:verbose]
+	  col_size = [0]
+	  bits[0].each_with_index do |item, index|
+		  col_size[index] = 0
+		  bits.each do |row|
+			 col_size[index] = [col_size[index], row[index].to_s.size].max
+		  end
+	  end
+	  fmt = col_size.inject('') do |fmt, size|
+		  fmt << " | " unless fmt.empty?
+		  fmt << "%#{size}s"
+	  end << "\n"
+	  bits.each_with_index do |bit, index|
+		  printf fmt, *bit
+		  printf fmt, *col_size.map { |i| '-' * i } if index.zero?	  
+	  end
+  else
+	  puts archive.entities.join("\n")
+  end
+when :version
+  puts parser.version.to_s
+else
+  puts parser.help
+end
+

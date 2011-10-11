@@ -8,6 +8,7 @@ spec = Gem::Specification.new do |s|
   s.summary = "Simple signed/encrypted archive format library"
   s.files = Dir["{bin,lib}/**/*"].to_a
   s.require_path = "lib"
+  s.executables = ['ampk']
   s.description = <<-EOF
   	AMPK is simple archive format which allows contents to be encrypted or signed
 	using a public/private key system.
