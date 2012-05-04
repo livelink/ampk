@@ -33,7 +33,7 @@ DATA - data is the original payload (potentially compressed/encrypted)
 
 ### To create an archive
 
-    require 'ampk/cypto'
+    require 'ampk/crypto'
     require 'ampk/writer'
 
     key = Crypto::Key.from_file("private_key.rsa", "my-secret-word")
