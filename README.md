@@ -27,6 +27,7 @@ DLEN - data is original length of DATA entry (not including compression, etc)
 SIGN - data is signature of data (signed using private key)
 FILT - data describes data content - "C" => enCrypted (ie. encrypted using private key), "Z" => Zlib compressed.
 TYPE - data is mimetype of next DATA entry
+ENCD - data is encoding of next DATA entry
 DATA - data is the original payload (potentially compressed/encrypted)
 
 ## Basic usage
