@@ -1,13 +1,14 @@
+require 'fileutils'
 require 'openssl'
 require 'base64'
 
 module Crypto
 	def self.create_keys(priv = "dsa_key", pub = "#{priv}", bits = 1024)
 		private_key = OpenSSL::PKey::RSA.new(bits)
-		File.mkpath('private')
-		File.mkpath('public')
+		FileUtils.mkdir_p('private')
+		FileUtils.mkdir_p('public')
 		File.open("private/"+priv+".private", "w+") { |fp| fp << private_key.to_s }
-		File.open("public/"+pub+".public",  "w+") { |fp| fp << private_key.public_key.to_s }    
+		File.open("public/"+pub+".public",  "w+") { |fp| fp << private_key.public_key.to_s }
 		private_key
 	end
 

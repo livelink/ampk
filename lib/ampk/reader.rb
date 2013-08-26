@@ -1,3 +1,5 @@
+require 'zlib'
+
 class AmpkReader
 	attr_reader :items, :path
 	def initialize(path, public_key)
@@ -103,6 +105,8 @@ class AmpkReader
 				item[:filter] = read_entry(header)
 			when 'TYPE'
 				item[:type] = read_entry(header)
+			when 'ENCD'
+				item[:encoding] = read_entry(header)
 			else
 				raise RuntimeError, "Unknown/invalid header #{header}"
 			end
@@ -118,9 +122,9 @@ class AmpkReader
 		if item[:filter]
 			item[:filter].reverse.each_byte do |byte|
 				case byte
-				when ?Z
+				when ?Z.ord
 					data = Zlib::Inflate.inflate(data)
-				when ?C
+				when ?C.ord
 					data = @public_key.decrypt(data)
 				end
 			end
@@ -128,12 +132,20 @@ class AmpkReader
 		
 		if item[:signature]
 			if @public_key.verify(item[:signature], data)
-				return data
+				return decode(item, data)
 			else
 				raise RuntimeError, "Invalid data for #{item[:name]}"
 			end
 		else
-			return data
+			return decode(item, data)
+		end
+	end
+	
+	def decode(item, data)
+		if item[:encoding] && data.respond_to?(:encoding)
+			data.force_encoding(item[:encoding])
+		else
+			data
 		end
 	end
 	
@@ -189,10 +201,18 @@ class AmpkReader
 	
 	def read_data_size
 		size = ""
-		while (c = @fp.getc).nonzero?
+		while (c = get_byte).nonzero?
 			size << c
 		end
-		size.to_i		
+		size.to_i
+	end
+	
+	def get_byte
+		if @fp.respond_to?(:getbyte)
+			@fp.getbyte
+		else
+			@fp.getc
+		end
 	end
 	
 	def read_data

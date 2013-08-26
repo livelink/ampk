@@ -46,7 +46,7 @@ DATA - data is the original payload (potentially compressed/encrypted)
 
 ### To read an archive
 
-    require 'ampk/cypto'
+    require 'ampk/crypto'
     require 'ampk/reader'
     
     key = Crypto::Key.from_file("public_key.rsa", "my-secret-word")
